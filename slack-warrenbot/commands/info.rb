@@ -22,6 +22,10 @@ module SlackWarrenbot
                     rescue
                         entity = SecQuery::Entity.new({})
                     end
+                    # if(entity.cik == nil)
+                    #     puts "Skipping #{symbol.symbol} because it does not have a valid CIK"                       
+                    #     next
+                    # end
                     attachmnts << {
                         fallback: "#{symbol.name} (#{symbol.symbol})",
                         title: "#{symbol.name} (#{symbol.symbol})",
@@ -53,11 +57,3 @@ module SlackWarrenbot
         end
     end
 end
-
-# #<StockQuote::Symbol:0x007fa4b5d6c7a0 
-# @symbol="APPL", 
-# @name="APPELL PETE CORP", 
-# @exch="PNK", 
-# @type="S", 
-# @exch_disp="OTC Markets", 
-# @type_disp="Equity">, #<StockQuote::Symbol:0x007fa4b5d65db0 @symbol="APGN.IR", @name="Applegreen Plc", @exch="ISE", @type="S", @exch_disp="Irish", @type_disp="Equity">,

@@ -10,7 +10,6 @@ gem 'stethoscope'
 gem 'sec_query'
 gem 'color-generator'
 
-
 group :development, :test do
   gem 'rake'
   gem 'foreman'
