@@ -1,59 +1,65 @@
 require 'stock_quote'
 require 'color-generator'
 require 'sec_query'
+require_relative '../charts'
+require_relative '../stocks'
+require_relative '../queries'
 
 module SlackWarrenbot
-    module Commands
-        class Info < SlackRubyBot::Commands::Base
+  module Commands
+    class Info < SlackRubyBot::Commands::Base
 
-            @generator = ColorGenerator.new saturation: 0.75, lightness: 0.75
+      @data_fields = ['Symbol', 'Name', 'Ask', 'ChangeinPercent','LastTradeDate','LastTradeTime', 'LastTradePriceOnly', 'Change']
 
-            command 'info' do |client, data, _match|
-                n = _match['expression']
-                symbols = StockQuote::Symbol.lookup(n)
-                if(symbols.length < 1 )
-                    client.say(channel: data.channel, text: "I couldn't find any info for company name or symbol '#{n}'")
-                    next
-                end
-                attachmnts = []
-                symbols.each do |symbol| 
-                    begin
-                        entity = SecQuery::Entity.find({:symbol=> symbol.symbol})
-                    rescue
-                        entity = SecQuery::Entity.new({})
-                    end
-                    # if(entity.cik == nil)
-                    #     puts "Skipping #{symbol.symbol} because it does not have a valid CIK"                       
-                    #     next
-                    # end
-                    attachmnts << {
-                        fallback: "#{symbol.name} (#{symbol.symbol})",
-                        title: "#{symbol.name} (#{symbol.symbol})",
-                        title_link: "https://finance.yahoo.com/quote/#{symbol.symbol}",
-                        fields: [
-                            {
-                                title: "Exchange and Type",
-                                value: "#{symbol.exch_disp} - #{symbol.exch}\n #{symbol.type_disp} - #{symbol.type}",
-                                short: true
-                                
-                            },
-                            {
-                                title: "SEC Info",
-                                value: "CIK: <#{entity.cik_href}|#{entity.cik}>\n SIC: <#{entity.assigned_sic_href}|#{entity.assigned_sic}-#{entity.assigned_sic_desc}>",
-                                short: true
-                            }
-                        ],
-                        image_url: "https://finance.google.com/finance/getchart?q=#{symbol.symbol}",
-                        color: "#{@generator.create_hex}",
-                    }
-                end
-                client.web_client.chat_postMessage(
-                    channel: data.channel,
-                    as_user: true,
-                    text: "Here's what I found for you for #{n}",
-                    attachments: attachmnts
-                )
-            end
+      def self.get_image_url(symbol)
+        return "https://finance.google.com/finance/getchart?q=#{symbol}&p=6M&i=86400"
+        #return "http://stockcharts.com/c-sc/sc?s=#{symbol}&p=D&yr=0&mn=6&dy=0&id=p65897859777"
+      end
+
+      def self.get_title_link(symbol)
+        return "https://finance.yahoo.com/quote/#{symbol}"
+      end
+
+      def self.post_quote(client, data, stock)
+        client.web_client.chat_postMessage(
+          channel: data.channel,
+          as_user: true,
+          attachments: [
+            {
+              fallback: "#{stock.name} (#{stock.symbol}): $#{stock.last_trade_price_only}",
+              title: "#{stock.name} (#{stock.symbol})",
+              title_link: get_title_link(stock.symbol),
+              text: "$#{stock.last_trade_price_only} (#{stock.changein_percent})",
+              image_url: get_image_url(stock.symbol),
+              color: stock.change.to_f > 0 ? '#00FF00' : '#FF0000'
+            }
+          ]
+        )
+      end  
+
+      command 'info' do |client, data, _match|
+        tickerSymbol = _match['expression']
+        puts "_match['expression']=#{tickerSymbol}"
+        stock = StockQuote::Stock.quote(tickerSymbol, nil, nil, @data_fields)
+        if stock.failure?
+          symbols = StockQuote::Symbol.lookup(tickerSymbol)
+          if symbols.length < 1
+            client.say(channel: data.channel, text: "I couldn't find that symbol or company name for you")
+            next
+          end
+          client.say(channel: data.channel, text: "I could not find that symbol, but found these similarly named companies")
+          symbols.each do |symbol|
+            s = symbol.symbol      
+            stock = StockQuote::Stock.quote(s, nil, nil, @data_fields)
+            post_quote(client, data, stock)
+          end
+          next
         end
+        post_quote(client, data, stock)
+      end
+
+      
+
     end
+  end
 end
