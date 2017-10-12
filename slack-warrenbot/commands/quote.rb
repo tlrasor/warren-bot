@@ -1,56 +1,62 @@
-require 'stock_quote'
 module SlackWarrenbot
   module Commands
     class Quote < SlackRubyBot::Commands::Base
-	
-  		@data_fields = ['Symbol', 'Name', 'Ask', 'ChangeinPercent','LastTradeDate','LastTradeTime', 'LastTradePriceOnly', 'Change']
 
-      def self.get_image_url(symbol)
-        return "https://finance.google.com/finance/getchart?q=#{symbol}&p=6M&i=86400"
-        #return "http://stockcharts.com/c-sc/sc?s=#{symbol}&p=D&yr=0&mn=6&dy=0&id=p65897859777"
-      end
+      extend SlackWarrenbot::CommandHelper
+      extend SlackWarrenbot::ChartsHelper
+      extend SlackWarrenbot::StocksHelper
+      extend SlackWarrenbot::QueriesHelper
+      extend SlackWarrenbot::YahooHelper
 
-      def self.get_title_link(symbol)
-        return "https://finance.yahoo.com/quote/#{symbol}"
-      end
-
-      def self.post_quote(client, data, stock)
-        client.web_client.chat_postMessage(
-          channel: data.channel,
-          as_user: true,
-          attachments: [
-            {
-              fallback: "#{stock.name} (#{stock.symbol}): $#{stock.last_trade_price_only}",
-              title: "#{stock.name} (#{stock.symbol})",
-              title_link: get_title_link(stock.symbol),
-              text: "$#{stock.last_trade_price_only} (#{stock.changein_percent})",
-              image_url: get_image_url(stock.symbol),
-              color: stock.change.to_f > 0 ? '#00FF00' : '#FF0000'
-            }
-          ]
-        )
-      end  
-
-  		command 'quote' do |client, data, _match|
-        tickerSymbol = _match['expression']
-        puts "_match['expression']=#{tickerSymbol}"
-  			stock = StockQuote::Stock.quote(tickerSymbol, nil, nil, @data_fields)
-        if stock.failure?
-          symbols = StockQuote::Symbol.lookup(tickerSymbol)
-          if symbols.length < 1
-            client.say(channel: data.channel, text: "I couldn't find that symbol or company name for you")
+      command 'quote' do |client, data, _match|
+        begin
+          query = _match['expression']
+          puts "_match['expression']=#{query}"
+          names, options = parse_query(query)
+          stocks = get_stocks(names, options)
+          if stocks.empty?
+            client.say(channel: data.channel, text: "I couldn't find any quotes for #{query}")
             next
           end
-          client.say(channel: data.channel, text: "I could not find that symbol, but found these similarly named companies")
-          symbols.each do |symbol|
-            s = symbol.symbol      
-            stock = StockQuote::Stock.quote(s, nil, nil, @data_fields)
-            post_quote(client, data, stock)
+
+          attachments = []
+          stocks.each do |stock|
+            options[:period] = "1d" unless options.key?(:period)
+            options[:interval] = "m" unless options.key?(:interval)
+            chart_url = get_chart_url(stock.symbol, options)
+            client.web_client.chat_postMessage(
+              channel: data.channel, 
+              as_user: true, 
+              text: make_text(stock)
+            )
+            # attachments << {
+            #   fallback: "#{stock.name} (#{stock.symbol}): $#{stock.last_trade_price_only}",
+            #   title: "#{stock.name} (#{stock.symbol})",
+            #   title_link: Utilities::Yahoo.get_profile_url(stock.symbol),
+            #   text: make_text(stock),
+            #   image_url: chart_url,
+            #   color: stock.change.to_f > 0 ? '#00FF00' : '#FF0000'
+            # }
           end
-          next
+          # client.web_client.chat_postMessage(channel: data.channel, as_user: true, attachments: attachments)
+        rescue => e
+          client.say(channel: data.channel, text: "I couldn't process this request due to an error. Please check your query.")
+          puts e
         end
-        post_quote(client, data, stock)
       end
+
+      def self.make_text(stock)
+        return """
+        *#{stock.name} (#{stock.symbol})*
+        \n*$#{stock.last_trade_price_only}* (#{stock.changein_percent}) 
+        \n#{stock.volume}
+        \n($#{stock.open}, $#{stock.days_high}, $#{stock.days_low})
+
+        """
+      end
+
 		end
   end
 end
+
+

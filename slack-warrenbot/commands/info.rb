@@ -1,13 +1,14 @@
 require 'stock_quote'
 require 'color-generator'
 require 'sec_query'
-require_relative '../charts'
-require_relative '../stocks'
-require_relative '../queries'
 
 module SlackWarrenbot
   module Commands
     class Info < SlackRubyBot::Commands::Base
+
+      extend SlackWarrenbot::CommandHelper
+      extend SlackWarrenbot::StocksHelper
+      extend SlackWarrenbot::QueriesHelper
 
       @data_fields = ['Symbol', 'Name', 'Ask', 'ChangeinPercent','LastTradeDate','LastTradeTime', 'LastTradePriceOnly', 'Change']
 

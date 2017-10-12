@@ -1,56 +1,56 @@
-require 'stock_quote'
-require 'color-generator'
 require 'sec_query'
 
 module SlackWarrenbot
     module Commands
         class Search < SlackRubyBot::Commands::Base
 
-            @generator = ColorGenerator.new saturation: 0.75, lightness: 0.75
+          extend SlackWarrenbot::CommandHelper
+          extend SlackWarrenbot::StocksHelper
+          extend SlackWarrenbot::SecHelper
+          extend SlackWarrenbot::YahooHelper
+          extend SlackWarrenbot::QueriesHelper
 
             command 'search' do |client, data, _match|
-                n = _match['expression']
-                symbols = StockQuote::Symbol.lookup(n)
+                query = _match['expression']
+                puts "_match['expression']=#{query}"
+                names, options = parse_query(query)
+                symbols = get_symbols(names, options)
                 if(symbols.length < 1 )
-                    client.say(channel: data.channel, text: "I couldn't find any info for company name or symbol '#{n}'")
+                    client.say(channel: data.channel, text: "I couldn't find any company names for '#{query}'")
                     next
                 end
                 attachmnts = []
                 symbols.each do |symbol| 
-                    begin
-                        entity = SecQuery::Entity.find({:symbol=> symbol.symbol})
-                    rescue
-                        entity = SecQuery::Entity.new({})
-                    end
-                    # if(entity.cik == nil)
-                    #     puts "Skipping #{symbol.symbol} because it does not have a valid CIK"                       
-                    #     next
-                    # end
+                    entity = get_sec_entity(symbol.symbol)
                     attachmnts << {
                         fallback: "#{symbol.name} (#{symbol.symbol})",
                         title: "#{symbol.name} (#{symbol.symbol})",
-                        title_link: "https://finance.yahoo.com/quote/#{symbol.symbol}",
+                        title_link: get_yahoo_profile_url(symbol.symbol),
                         fields: [
                             {
-                                title: "Exchange and Type",
-                                value: "#{symbol.exch_disp} - #{symbol.exch}\n #{symbol.type_disp} - #{symbol.type}",
+                                value: ["Exchange - #{symbol.exch_disp} (#{symbol.exch})",
+                                        "CIK - <#{entity.cik_href}|#{entity.cik}>",
+                                        "SIC - <#{entity.assigned_sic_href}|#{entity.assigned_sic}-#{entity.assigned_sic_desc}>"
+                                        
+                                      ].join("\n"),
                                 short: true
-                                
                             },
                             {
-                                title: "SEC Info",
-                                value: "CIK: <#{entity.cik_href}|#{entity.cik}>\n SIC: <#{entity.assigned_sic_href}|#{entity.assigned_sic}-#{entity.assigned_sic_desc}>",
+                                value: [
+                                        "Type - #{symbol.type_disp} (#{symbol.type})",
+                                        "State - <#{entity.state_location_href}|#{entity.state_location}>",
+
+                                        ].join("\n"),
                                 short: true
                             }
                         ],
-                        image_url: "https://finance.google.com/finance/getchart?q=#{symbol.symbol}",
-                        color: "#{@generator.create_hex}",
+                        color: "#{get_color}"
                     }
                 end
                 client.web_client.chat_postMessage(
                     channel: data.channel,
                     as_user: true,
-                    text: "Here's what I found for you for #{n}",
+                    text: "Here's what I found for #{query}",
                     attachments: attachmnts
                 )
             end
