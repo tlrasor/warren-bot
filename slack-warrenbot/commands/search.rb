@@ -14,9 +14,10 @@ module SlackWarrenbot
                 query = _match['expression']
                 puts "_match['expression']=#{query}"
                 names, options = parse_query(query)
+                client.say(channel: data.channel, text: ":mag_right: Searching for _#{query}_ ...")
                 symbols = get_symbols(names, options)
                 if(symbols.length < 1 )
-                    client.say(channel: data.channel, text: "I couldn't find any company names for '#{query}'")
+                    client.say(channel: data.channel, text: ":cold_sweat: I couldn't find any company names for '#{query}'")
                     next
                 end
                 attachmnts = []
@@ -50,7 +51,6 @@ module SlackWarrenbot
                 client.web_client.chat_postMessage(
                     channel: data.channel,
                     as_user: true,
-                    text: "Here's what I found for #{query}",
                     attachments: attachmnts
                 )
             end
