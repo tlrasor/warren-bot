@@ -13,10 +13,12 @@ module SlackWarrenbot
         begin
           query = _match['expression']
           puts "_match['expression']=#{query}"
+          client.say(channel: data.channel, text: ":mag_right: Searching for _#{query}_...")
+          client.typing channel: data.channel
           names, options = parse_query(query)
           stocks = get_stocks(names, options)
           if stocks.empty?
-            client.say(channel: data.channel, text: "I couldn't find any charts for #{query}")
+            client.say(channel: data.channel, text: ":cold_sweat: I couldn't find any charts for #{query}")
             next
           end
           attachments = []
@@ -30,7 +32,7 @@ module SlackWarrenbot
               color: "#{get_color(:blue)}"
             }
           end
-          client.web_client.chat_postMessage(channel: data.channel, text: "Here's what I found for #{query}", as_user: true, attachments: attachments)
+          client.web_client.chat_postMessage(channel: data.channel, as_user: true, attachments: attachments)
         rescue => e
           client.say(channel: data.channel, text: "I couldn't process this request due to an error. Please check your query.")
           puts e

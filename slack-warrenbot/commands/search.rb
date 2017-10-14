@@ -14,7 +14,8 @@ module SlackWarrenbot
                 query = _match['expression']
                 puts "_match['expression']=#{query}"
                 names, options = parse_query(query)
-                client.say(channel: data.channel, text: ":mag_right: Searching for _#{query}_ ...")
+                client.say(channel: data.channel, text: ":mag_right: Searching for _#{query}_...")
+                client.typing channel: data.channel
                 symbols = get_symbols(names, options)
                 if(symbols.length < 1 )
                     client.say(channel: data.channel, text: ":cold_sweat: I couldn't find any company names for '#{query}'")
