@@ -3,16 +3,19 @@ source 'https://rubygems.org'
 ruby "2.6.1"
 
 gem 'slack-ruby-bot'
-gem 'puma'
-gem 'sinatra'
-gem 'dotenv'
 gem 'celluloid-io'
-gem 'stock_quote', '~> 2.0.0'
+
+gem "rack", ">= 2.0.6"
+gem 'puma'
+gem 'sinatra', ">= 2.0.2"
 gem 'stethoscope'
-gem 'sec_query'
+
+gem 'dotenv'
 gem 'color-generator'
 gem 'require_all'
-gem 'logging'
+
+gem 'stock_quote', '~> 2.0.0'
+
 
 group :development, :test do
   gem 'rake'
