@@ -1,5 +1,5 @@
 require 'dotenv'
-Dotenv.load
+Dotenv.load unless (ENV['RACK_ENV'] && ENV['RACK_ENV'] == 'production')
 
 require 'stethoscope'
 use Stethoscope
