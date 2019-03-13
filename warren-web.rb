@@ -1,6 +1,6 @@
 require 'sinatra/base'
 
-module SlackWarrenbot
+module Warren
   class Web < Sinatra::Base
     get '/' do
       'Get to trading!'

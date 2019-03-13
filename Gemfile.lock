@@ -42,8 +42,6 @@ GEM
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.12.2)
       faraday (>= 0.7.4, < 1.0)
-    foreman (0.84.0)
-      thor (~> 0.19.1)
     gli (2.16.1)
     hashdiff (0.3.6)
     hashie (3.5.6)
@@ -51,12 +49,18 @@ GEM
     http-cookie (1.0.3)
       domain_name (~> 0.5)
     i18n (0.8.6)
+    irb (1.0.0)
     json (2.1.0)
+    little-plugger (1.1.4)
+    logging (2.2.2)
+      little-plugger (~> 1.1)
+      multi_json (~> 1.10)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
     mini_portile2 (2.3.0)
     minitest (5.10.3)
+    multi_json (1.13.1)
     multipart-post (2.0.0)
     mustermann (1.0.1)
     netrc (0.11.0)
@@ -71,6 +75,7 @@ GEM
     rack-test (0.7.0)
       rack (>= 1.0, < 3)
     rake (12.1.0)
+    require_all (2.0.0)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
@@ -113,10 +118,9 @@ GEM
       dictionary (>= 1.0)
       rack (> 1.0)
       tilt (>= 1.0)
-    stock_quote (1.4.0)
+    stock_quote (2.0.0)
       json
       rest-client (~> 2.0.2)
-    thor (0.19.4)
     thread_safe (0.3.6)
     tilt (2.0.8)
     timers (4.1.2)
@@ -142,21 +146,23 @@ DEPENDENCIES
   celluloid-io
   color-generator
   dotenv
-  foreman
+  irb
+  logging
   puma
   rack-test
   rake
+  require_all
   rspec
   sec_query
   sinatra
   slack-ruby-bot
   stethoscope
-  stock_quote
+  stock_quote (~> 2.0.0)
   vcr
   webmock
 
 RUBY VERSION
-   ruby 2.4.0p0
+   ruby 2.6.1p33
 
 BUNDLED WITH
-   1.14.4
+   1.17.2

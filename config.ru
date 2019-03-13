@@ -1,19 +1,17 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 require 'dotenv'
 Dotenv.load
 
 require 'stethoscope'
 use Stethoscope
 
-require 'slack-warrenbot'
-require 'web'
+require_relative './warren-bot'
+require_relative './warren-web'
 
 Thread.abort_on_exception = true
 
 Thread.new do
   begin
-    SlackWarrenbot::Bot.run
+    Warren::Bot.run
   rescue Exception => e
     STDERR.puts "ERROR: #{e}"
     STDERR.puts e.backtrace
@@ -21,4 +19,4 @@ Thread.new do
   end
 end
 
-run SlackWarrenbot::Web
+run Warren::Web
