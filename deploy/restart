@@ -2,8 +2,10 @@
 mkdir -p tmp
 touch tmp/restart.txt
 
+GIT_TAG=`git log --pretty=format:'%h' -n 1`
+
 docker build -t warren-bot .
 
-docker tag warren-bot:latest warren-bot:arm
+docker tag warren-bot:latest warren-bot:arm-"$GIT_TAG"
 
-docker service update --image warren-bot:arm warren-bot
+docker service update --image warren-bot:arm-"$GIT_TAG" warren-bot
