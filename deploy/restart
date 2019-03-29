@@ -1,2 +1,8 @@
 #!/bin/sh
+mkdir -p tmp
+touch tmp/restart.txt
 
+export SLACK_API_TOKEN="xoxb-247325392742-nKWen01aEkIMoyYQts6xvi5p"
+export RACK_ENV="production"
+
+docker build -t warren-bot .
