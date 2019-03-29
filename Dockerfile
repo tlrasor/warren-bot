@@ -14,7 +14,4 @@ RUN apk add --update ruby-dev ruby-io-console ruby-json yaml build-base &&\
 RUN chown -R appuser:appgroup /app
 USER appuser
 
-ENV SLACK_API_TOKEN="xoxb-247325392742-nKWen01aEkIMoyYQts6xvi5p"
-ENV RACK_ENV="production"
-
 ENTRYPOINT ./start.sh
