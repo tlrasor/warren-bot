@@ -1,2 +1,6 @@
+.git
 .bundle
 vendor
+.env
+.travis.yml
+README.md
