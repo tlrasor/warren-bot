@@ -1,7 +1,8 @@
+require 'require_all'
 require 'slack-ruby-bot'
 
-require_all './lib/helpers/*.rb'
-require_all './lib/commands/*.rb'
+require_all './bot/helpers/*.rb'
+require_all './bot/commands/*.rb'
 
 module Warren
   class Bot < SlackRubyBot::Bot

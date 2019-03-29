@@ -1,3 +1,2 @@
-require 'require_all'
 
-require_all './lib/*.rb'
+require_relative './bot/bot'
