@@ -1,8 +1,13 @@
 require 'dotenv'
 Dotenv.load unless (ENV['RACK_ENV'] && ENV['RACK_ENV'] == 'production')
 
-require_relative './bot/bot'
+require 'rubygems'
+require 'bundler'
+Bundler.require(:default)
 
+require_relative './config/slack'
+
+require_relative './bot/bot'
 begin
     Warren::Bot.run
 rescue Exception => e

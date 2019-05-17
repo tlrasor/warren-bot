@@ -11,7 +11,8 @@ module Warren
         begin
           query = _match['expression']
           puts "_match['expression']=#{query}"
-          
+          puts "data=#{data}"
+          puts "match=#{_match}"
           client.say(channel: data.channel, text: ":mag_right: Looking up a quote for _#{query}_...")
           client.typing channel: data.channel
 

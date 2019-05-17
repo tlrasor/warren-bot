@@ -2,10 +2,16 @@
 mkdir -p tmp
 touch tmp/restart.txt
 
+ARCHITECTURE=""
+case $(uname -m) in
+    x86_64) ARCHITECTURE="amd64" ;;
+    arm)    dpkg --print-architecture | grep -q "arm64" && ARCHITECTURE="arm64" || ARCHITECTURE="arm" ;;
+    *) echo "unsupported architecture"; exit 1;;
+esac
 GIT_TAG=`git log --pretty=format:'%h' -n 1`
+DOCKER_TAG="${ARCHITECTURE}-${GIT_TAG}"
 
-docker build -t warren-bot .
+./build.sh
 
-docker tag warren-bot:latest warren-bot:arm-"$GIT_TAG"
-
-docker service update --image warren-bot:arm-"$GIT_TAG" warren-bot
+docker tag warren-bot:latest warren-bot:"$DOCKER_TAG"
+docker service update --image warren-bot:"$DOCKER_TAG" warren-bot
