@@ -5,7 +5,7 @@ touch tmp/restart.txt
 ARCHITECTURE=""
 case $(uname -m) in
     x86_64) ARCHITECTURE="amd64" ;;
-    arm)    dpkg --print-architecture | grep -q "arm64" && ARCHITECTURE="arm64" || ARCHITECTURE="arm" ;;
+    arm | armv7l)    dpkg --print-architecture | grep -q "arm64" && ARCHITECTURE="arm64" || ARCHITECTURE="arm" ;;
     *) echo "unsupported architecture"; exit 1;;
 esac
 GIT_TAG=`git log --pretty=format:'%h' -n 1`
